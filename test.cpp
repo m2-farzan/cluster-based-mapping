@@ -2,7 +2,7 @@
 #include "hdbscan.h"
 
 TEST(Test, SmallTree) {
-    mat A {
+    mat P {
         {4, -5},
         {0, 10},
         {1, 10},
@@ -16,7 +16,7 @@ TEST(Test, SmallTree) {
         {2, -5},
         {3, -5},
     };
-    A = A.t();
+    P = P.t();
     mat D(12, 12, arma::fill::ones);
     D *= 1000;
     D(2,4) = 2;
@@ -36,10 +36,10 @@ TEST(Test, SmallTree) {
             D(i, j) = D(i, j) == 1000 ? D(j, i) : D(i, j);
         }
     }
-    vector<int> E = mst(D);
-    vector<Joint> SLT = single_linkage_tree(E, D);
-    vector<Cluster> condensed_clusters = get_condensed_clusters(SLT, 3);
-    vector<Cluster> stable_clusters = get_stable_clusters(condensed_clusters);
+    HDBSCAN model(3);
+    model.fit(P, D);
+    auto stable_clusters = model.get_clusters();
+    auto SLT = model._get_slt();
 
     EXPECT_EQ(SLT[0].a, 2);
     EXPECT_EQ(SLT[0].b, 4);
